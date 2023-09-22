@@ -1,19 +1,19 @@
 <template>
-    <v-container>
-        <v-row>
-            <LoginForm />
-        </v-row>
-    </v-container>
+  <v-container>
+    <v-row>
+      <v-col>
+        <LoginForm />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
-
 import LoginForm from '../components/Login.vue'
 export default {
-    components: {
-        LoginForm
-    }
-
+  components: {
+    LoginForm
+  }
 }
 </script>
 
