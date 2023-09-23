@@ -1,10 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
+    <v-app-bar app color="primary" dark>
       <div class="d-flex align-center">
         <v-img
           alt="Vuetify Logo"
@@ -27,23 +23,19 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn
-        text
-        @click="goToLogin()"
-      >
-        เข้าสู่ระบบ
-      </v-btn>
+      <v-btn text @click="goToManage()"> หน้าจัดการข้อมูล </v-btn>
+
+      <v-btn text @click="goToLogin()"> เข้าสู่ระบบ </v-btn>
     </v-app-bar>
 
     <v-main>
-      <router-view/>
+      <router-view />
     </v-main>
   </v-app>
 </template>
 
 <script>
 //import goToLogin from 'vuetify/lib/services/goToLogin';
-
 
 export default {
   name: 'App',
@@ -52,9 +44,12 @@ export default {
     //
   }),
   methods: {
-    goToLogin () {
-      this.$router.push('/login')
-
+    goToLogin() {
+      this.$router.push({ path: '/login' }).catch(() => {})
+    },
+    goToManage() {
+    
+      this.$router.push({ path: '/manageTable' }).catch(() => {})
     }
   }
 }

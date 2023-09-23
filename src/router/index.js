@@ -1,6 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import HomeView from "../views/HomeView.vue";
+import TableView from "../views/TableView.vue"
 
 Vue.use(VueRouter);
 
@@ -24,6 +25,12 @@ const routes = [
     name: 'login',
     component: () => import('../views/LoginView.vue')
   },
+  {
+    path: '/manageTable',
+    name: 'manageTable',
+    component: () => import('../views/TableView.vue')
+  },
+
 ];
 
 const router = new VueRouter({
