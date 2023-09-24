@@ -2,7 +2,7 @@
   <div>
     <v-data-table
       :headers="headers"
-      :items="desserts"
+      :items="employeeItem"
       sort-by="calories"
       class="elevation-1"
     >
@@ -21,7 +21,9 @@
           </v-btn>
         </v-toolbar>
       </template>
-
+      <template v-slot:[`item.role`]="{ item }">
+        {{ item.role.name }}
+      </template>
       <template v-slot:[`item.actions`]="{ item }">
         <v-btn
           small
@@ -51,35 +53,23 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="12" sm="6" md="6">
                 <v-text-field
-                  v-model="editedItem.name"
-                  label="ชื่อของหวาน"
+                  v-model="firstName"
+                  label="ชื่อจริง"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field v-model="lastName" label="นามสกุล"></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="6" md="6">
                 <v-text-field
-                  v-model="editedItem.calories"
-                  label="แคลลอรี่"
+                  v-model="salary"
+                  label=" เงินเดือน"
                 ></v-text-field>
               </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field
-                  v-model="editedItem.fat"
-                  label="ไขมัน (กรัม)"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field
-                  v-model="editedItem.carbs"
-                  label="คาร์โบไฮเดต (กรัม)"
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12" sm="6" md="4">
-                <v-text-field
-                  v-model="editedItem.protein"
-                  label="โปรตีน (กรัม)"
-                ></v-text-field>
+              <v-col cols="12" sm="6" md="6">
+                <v-text-field v-model="role" label="ตำแหน่ง"></v-text-field>
               </v-col>
             </v-row>
           </v-container>
@@ -115,24 +105,32 @@
 <script>
 export default {
   data: () => ({
+    firstName: '',
+    lastName: '',
+    salary: '',
+    role: '',
     dialogCreate: false,
     dialogDelete: false,
     formTitle: '',
+    idEmployee: '',
+    idForDelete: '',
     headers: [
       {
-        text: 'ชื่อของหวาน (100g serving)',
+        text: 'ไอดี',
         align: 'start',
         sortable: false,
-        value: 'name'
+        value: 'id'
       },
-      { text: 'แคลลอรี่', value: 'calories' },
-      { text: 'ไขมัน (กรัม)', value: 'fat' },
-      { text: 'คาร์โบไฮเดต (กรัม)', value: 'carbs' },
-      { text: 'โปรตีน (กรัม)', value: 'protein' },
+      { text: 'ชื่อจริง', value: 'firstName' },
+      { text: 'นามสกุล', value: 'lastName' },
+      { text: 'เงินเดือน', value: 'salary' },
+      { text: 'ตำแหน่ง', value: 'role' },
       { text: 'จัดการ', value: 'actions', sortable: false }
     ],
-    desserts: [],
+
+    employeeItem: [],
     editedIndex: -1,
+
     editedItem: {
       name: '',
       calories: 0,
@@ -140,14 +138,14 @@ export default {
       carbs: 0,
       protein: 0
     },
+
     defaultItem: {
       name: '',
       calories: 0,
       fat: 0,
       carbs: 0,
       protein: 0
-    },
-    formTitle: ''
+    }
   }),
 
   watch: {
@@ -164,138 +162,120 @@ export default {
   },
 
   methods: {
-    initialize() {
-      this.desserts = [
-        {
-          name: 'Frozen Yogurt',
-          calories: 159,
-          fat: 6.0,
-          carbs: 24,
-          protein: 4.0
-        },
-        {
-          name: 'Ice cream sandwich',
-          calories: 237,
-          fat: 9.0,
-          carbs: 37,
-          protein: 4.3
-        },
-        {
-          name: 'Eclair',
-          calories: 262,
-          fat: 16.0,
-          carbs: 23,
-          protein: 6.0
-        },
-        {
-          name: 'Cupcake',
-          calories: 305,
-          fat: 3.7,
-          carbs: 67,
-          protein: 4.3
-        },
-        {
-          name: 'Gingerbread',
-          calories: 356,
-          fat: 16.0,
-          carbs: 49,
-          protein: 3.9
-        },
-        {
-          name: 'Jelly bean',
-          calories: 375,
-          fat: 0.0,
-          carbs: 94,
-          protein: 0.0
-        },
-        {
-          name: 'Lollipop',
-          calories: 392,
-          fat: 0.2,
-          carbs: 98,
-          protein: 0
-        },
-        {
-          name: 'Honeycomb',
-          calories: 408,
-          fat: 3.2,
-          carbs: 87,
-          protein: 6.5
-        },
-        {
-          name: 'Donut',
-          calories: 452,
-          fat: 25.0,
-          carbs: 51,
-          protein: 4.9
-        },
-        {
-          name: 'KitKat',
-          calories: 518,
-          fat: 26.0,
-          carbs: 65,
-          protein: 7
-        }
-      ]
+    async initialize() {
+      this.employeeItem = []
+      try {
+        var data = await this.axios.get('http://localhost:9000/employee')
+        console.log('data employee ===>', data)
+        this.employeeItem = data.data
+      } catch (error) {
+        console.log(error.message)
+      }
     },
 
     openDialog(Actions, item) {
       //console.log(Actions, item)
-      console.log('index item', this.desserts.indexOf(item))
+      console.log('index item', this.employeeItem.indexOf(item))
       this.formTitle = ''
+
       if (Actions === 'add') {
         this.dialogCreate = true
         this.formTitle = 'เพิ่มข้อมูล'
-        this.editItem = item
+        // this.editedItem = item
       } else {
+        //console.log(item)
         this.dialogCreate = true
         this.formTitle = 'แก้ไขข้อมูล'
-        this.editItem = item
-        this.editedIndex = this.desserts.indexOf(item)
+        // this.editedItem = item
+        // this.editedIndex = this.employeeItem.indexOf(item)
+        this.firstName = item.firstName
+        this.lastName = item.lastName
+        this.salary = item.salary
+        this.role = item.role.name
+        this.idEmployee = item.id
       }
     },
 
     editItem(item) {
       consoloe.log('item select', item)
-      this.editedIndex = this.desserts.indexOf(item)
-      this.editedItem = Object.assign({}, item)
-      this.dialog = true
+      consoloe.log('index item', this.employeeItem.indexOf(item))
+      // this.editedIndex = this.employeeItem.indexOf(item)
+      //this.editedItem = Object.assign({}, item)
+      //this.dialog = true
     },
 
     deleteItem(item) {
-      this.editedIndex = this.desserts.indexOf(item)
+      //this.editedIndex = this.employeeItem.indexOf(item)
       // this.editedItem = Object.assign({}, item)
+      //this.editedItem = item
+      this.idForDelete = item.id
       this.dialogDelete = true
-      this.editedItem = item
     },
 
-    deleteItemConfirm() {
-      this.desserts.splice(this.editedIndex, 1)
+    async deleteItemConfirm() {
+      try {
+        var response = await this.axios.delete(
+          'http://localhost:9000/employee/' + this.idForDelete
+        )
+        this.initialize()
+      } catch (error) {
+        console.log(error.message)
+      }
       this.closeDelete()
     },
 
     close() {
       this.dialogCreate = false
-      this.editedItem = []
-      this.editedIndex = -1
-      // this.defaultItem = {
-      //   name: '',
-      //   calories: 0,
-      //   fat: 0,
-      //   carbs: 0,
-      //   protein: 0
-      // }
+      this.firstName = ''
+      this.lastName = ''
+      this.salary = ''
+      this.role = ''
     },
 
-    save(actions) {
-      if (actions === 'เพิ่มข้อมูล') {
-        this.desserts.push(this.editItem)
-      } else {
-        // this.dialogCreate = false
-        Object.assign(this.desserts[this.editedIndex], this.editItem)
+    async save(actions) {
+      var data = {
+        firstName: this.firstName,
+        lastName: this.lastName,
+        salary: this.salary,
+        role: { name: this.role },
+        skills: [{ skills: '' }]
       }
-      this.close()
+
+      if (actions === 'เพิ่มข้อมูล') {
+        // this.employeeItem.push(this.editedItem)
+        // this.close()
+        // console.log('data after send===>', data)
+        try {
+          var dataResponse = await this.axios.post(
+            'http://localhost:9000/employee',
+            data
+          )
+          console.log('dataResponse ===>', dataResponse)
+          this.close()
+          this.initialize()
+        } catch (error) {
+          console.log(error.message)
+        }
+      } else {
+        try {
+          var dataResponse = await this.axios.put(
+            'http://localhost:9000/employee/' + this.idEmployee,
+            data
+          )
+          console.log('dataResponse ===>', dataResponseEdit)
+          this.close()
+          this.initialize()
+        } catch (error) {
+          console.log(error.message)
+        }
+        this.close()
+
+        // this.dialogCreate = false
+        //Object.assign(this.desserts[this.editedIndex], this.editedItem)
+        //this.close()
+      }
     },
+
     closeDelete() {
       this.dialogDelete = false
       this.$nextTick(() => {
