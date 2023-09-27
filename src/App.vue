@@ -22,6 +22,7 @@
       </div>
 
       <v-spacer></v-spacer>
+      <v-btn text @click="goToConnect()"> Connect Backend </v-btn>
 
       <v-btn text @click="goToManage()"> หน้าจัดการข้อมูล </v-btn>
 
@@ -35,8 +36,6 @@
 </template>
 
 <script>
-//import goToLogin from 'vuetify/lib/services/goToLogin';
-
 export default {
   name: 'App',
 
@@ -44,11 +43,13 @@ export default {
     //
   }),
   methods: {
+    goToConnect() {
+      this.$router.push({ path: '/connect' }).catch(() => {})
+    },
     goToLogin() {
       this.$router.push({ path: '/login' }).catch(() => {})
     },
     goToManage() {
-    
       this.$router.push({ path: '/manageTable' }).catch(() => {})
     }
   }
